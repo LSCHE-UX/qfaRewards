@@ -22,11 +22,6 @@ module.exports = {
 
     const discordId = interaction.user.id;
 
-    // Optional: prevent relinking if already linked
-    // (If you want to allow relink, remove this block)
-    // const existing = await query(`SELECT roblox_user_id FROM users WHERE discord_user_id = $1`, [discordId]);
-    // if (existing.rowCount && existing.rows[0].roblox_user_id) ...
-
     const raw = makeLinkCode();
     const code = `QF-${raw}`; // easy to spot in bios
     const expiresAt = nowPlusMinutes(linkCodeMinutes);
@@ -51,6 +46,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("<:qantas_tail:1430530129825890375> Qantas Frequent Flyers Rewards - Account Linking")
       .setColor(0xdf0000)
+      .setImage('https://media.discordapp.net/attachments/1392247713474678815/1469567409680809994/image.png?ex=6997f2cd&is=6996a14d&hm=ee1a901937b0ae4fcad1b2a2c76e9995e904f9f885c4852d271ded92cc2ed4f6&=&format=webp&quality=lossless&width=1134&height=15')
       .setDescription(
         [
           `Your code: **${code}**`,
