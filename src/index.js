@@ -4,7 +4,7 @@ const path = require("path");
 
 const { token } = require("./config");
 const { query, withTx } = require("./db");
-
+require("./src/index.js");
 const {
   ModalBuilder,
   TextInputBuilder,
@@ -12,6 +12,7 @@ const {
   ActionRowBuilder,
   EmbedBuilder
 } = require("discord.js");
+
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
