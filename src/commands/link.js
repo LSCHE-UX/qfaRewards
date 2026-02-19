@@ -13,7 +13,7 @@ const { linkCodeMinutes } = require("../config");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("link")
-    .setDescription("Link your Roblox account to Qantas Rewards."),
+    .setDescription("Link your Roblox account to Qantas Rewards (bio verification)."),
 
   async execute(interaction) {
     if (!requireAllowedGuild(interaction)) {
@@ -21,11 +21,17 @@ module.exports = {
     }
 
     const discordId = interaction.user.id;
-    const code = makeLinkCode();
+
+    // Optional: prevent relinking if already linked
+    // (If you want to allow relink, remove this block)
+    // const existing = await query(`SELECT roblox_user_id FROM users WHERE discord_user_id = $1`, [discordId]);
+    // if (existing.rowCount && existing.rows[0].roblox_user_id) ...
+
+    const raw = makeLinkCode();
+    const code = `QF-${raw}`; // easy to spot in bios
     const expiresAt = nowPlusMinutes(linkCodeMinutes);
 
     await withTx(async (db) => {
-      // ensure user row exists
       await db.query(
         `INSERT INTO users (discord_user_id)
          VALUES ($1)
@@ -33,7 +39,6 @@ module.exports = {
         [discordId]
       );
 
-      // upsert link code
       await db.query(
         `INSERT INTO link_codes (discord_user_id, code, expires_at)
          VALUES ($1, $2, $3)
@@ -44,16 +49,20 @@ module.exports = {
     });
 
     const embed = new EmbedBuilder()
-      .setTitle("Qantas Rewards — Link your Roblox Account")
+      .setTitle("Qantas Rewards — Link via Roblox Bio")
       .setDescription(
         [
-          `Here’s your link code: **${code}**`,
+          `Your code: **${code}**`,
           `Expires in **${linkCodeMinutes} minutes**.`,
           ``,
-          `Press **Verify** and enter your Roblox UserId + Username + this code.`
+          `**Step 1:** Open your Roblox profile and paste the code into your **bio/description**.`,
+          `**Step 2:** Come back here and press **Verify**.`,
+          ``,
+          `Example bio line:`,
+          `\`${code}\``
         ].join("\n")
       )
-      .setFooter({ text: "Tip: Roblox UserId is the number in your profile URL." });
+      .setFooter({ text: "After verifying, you can remove the code from your bio." });
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -62,13 +71,9 @@ module.exports = {
         .setStyle(ButtonStyle.Primary)
     );
 
-    // DM first, fallback to ephemeral reply if DMs blocked
     try {
       await interaction.user.send({ embeds: [embed], components: [row] });
-      return interaction.reply({
-        content: "✅ I’ve sent you a DM with your code + Verify button.",
-        ephemeral: true
-      });
+      return interaction.reply({ content: "✅ Check your DMs for instructions + Verify button.", ephemeral: true });
     } catch {
       return interaction.reply({
         content: "⚠️ I couldn’t DM you (privacy settings). Use this panel instead:",
