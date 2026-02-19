@@ -33,3 +33,15 @@ module.exports = {
   isPositiveInt,
   pointsAdminRoleIds
 };
+
+const { PermissionsBitField } = require("discord.js");
+
+function hasManageServer(member) {
+  if (!member) return false;
+  return member.permissions.has(PermissionsBitField.Flags.ManageGuild);
+}
+
+module.exports = {
+  // ...keep your existing exports
+  hasManageServer,
+};

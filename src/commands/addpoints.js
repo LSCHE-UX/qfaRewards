@@ -21,9 +21,13 @@ module.exports = {
       return interaction.reply({ content: "This bot can't be used in this server.", ephemeral: true });
     }
 
-    if (!hasAnyRole(interaction.member, pointsAdminRoleIds)) {
-      return interaction.reply({ content: "❌ You don’t have permission to modify points.", ephemeral: true });
-    }
+const { hasManageServer } = require("../utils");
+
+if (!hasManageServer(interaction.member)) {
+  return interaction.reply({ content: "❌ You need **Manage Server** to modify points.", ephemeral: true });
+}
+
+
 
     const target = interaction.options.getUser("user");
     const amount = interaction.options.getInteger("amount");
