@@ -49,7 +49,8 @@ module.exports = {
     });
 
     const embed = new EmbedBuilder()
-      .setTitle("Qantas Rewards — Link via Roblox Bio")
+      .setTitle("<:qantas_tail:1430530129825890375> Qantas Frequent Flyers Rewards - Account Linking")
+      .setColor(0xdf0000)
       .setDescription(
         [
           `Your code: **${code}**`,
@@ -68,7 +69,7 @@ module.exports = {
       new ButtonBuilder()
         .setCustomId("qr_verify_start")
         .setLabel("Verify")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Success)
     );
 
     try {
