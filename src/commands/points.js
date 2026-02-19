@@ -23,14 +23,14 @@ module.exports = {
     );
 
     if (res.rowCount === 0) {
-      return interaction.reply({ content: "You’re not set up yet. Run **/link** first.", ephemeral: true });
+      return interaction.reply({ content: "Your profile has not been linked yet. Please run `/link` first.", ephemeral: true });
     }
 
     const r = res.rows[0];
 
     if (!r.roblox_user_id) {
       return interaction.reply({
-        content: "You aren’t linked yet. Run **/link** then press **Verify**.",
+        content: "Your profile has not been linked yet. Please run `/link` first.",
         ephemeral: true
       });
     }

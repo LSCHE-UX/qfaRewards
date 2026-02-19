@@ -13,7 +13,7 @@ const { linkCodeMinutes } = require("../config");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("link")
-    .setDescription("Link your Roblox account to Qantas Rewards (bio verification)."),
+    .setDescription("Link your Roblox account to Qantas Rewards."),
 
   async execute(interaction) {
     if (!requireAllowedGuild(interaction)) {
@@ -55,8 +55,8 @@ module.exports = {
           `Your code: **${code}**`,
           `Expires in **${linkCodeMinutes} minutes**.`,
           ``,
-          `**Step 1:** Open your Roblox profile and paste the code into your **bio/description**.`,
-          `**Step 2:** Come back here and press **Verify**.`,
+          `**Step 1:** Open your <:link1:1403914963877363867> [Roblox profile](https://www.roblox.com/User.aspx?lD=) and paste the code into your **bio/description**.`,
+          `**Step 2:** Come back here and press **Verify**, to continue the process.`,
           ``,
           `Example bio line:`,
           `\`${code}\``

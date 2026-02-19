@@ -153,14 +153,15 @@ if (interaction.isModalSubmit()) {
   }
 
   const welcome = new EmbedBuilder()
-    .setTitle("✅ Welcome to Qantas Rewards")
+    .setTitle("<:qantas_tail:1430530129825890375> Welcome to Qantas Frequent Flyer Rewards")
     .setDescription(
       [
         `Linked Roblox account: **${result.robloxUsername}** (${result.robloxUserId})`,
         ``,
         `Next steps:`,
         `• Check balance: **/points**`,
-        `• Earn points on flights + events`
+        `• Earn points on by attending flights!`
+        `• Redeem your points for upgrades and perks in flight.`,
       ].join("\n")
     );
 
