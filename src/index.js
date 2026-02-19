@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { token } = require("./config");
 const { query, withTx } = require("./db");
+const { initDatabase } = require("./db");
 
 const {
   ModalBuilder,
@@ -27,11 +28,16 @@ for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"))) 
 
 client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
+
   try {
     await query("SELECT 1");
     console.log("✅ Database connected");
+
+    await initDatabase();
+    console.log("📦 Tables ensured");
+
   } catch (e) {
-    console.error("❌ Database connection failed:", e.message);
+    console.error("❌ Database setup failed:", e.message);
   }
 });
 
