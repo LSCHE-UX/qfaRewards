@@ -74,10 +74,10 @@ module.exports = {
 
     try {
       await interaction.user.send({ embeds: [embed], components: [row] });
-      return interaction.reply({ content: "✅ Check your DMs for instructions + Verify button.", ephemeral: true });
+      return interaction.reply({ content: "<:qantas_tail:1430530129825890375> Check your DMs for instructions and the verify button.", ephemeral: true });
     } catch {
       return interaction.reply({
-        content: "⚠️ I couldn’t DM you (privacy settings). Use this panel instead:",
+        content: "<:qantas_tail:1430530129825890375> I couldn’t DM you due to your privacy settings. Use this panel instead:",
         embeds: [embed],
         components: [row],
         ephemeral: true
