@@ -1,13 +1,11 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { withTx } = require("../db");
-if (!hasManageServer(interaction.member)) {
-  return interaction.reply({ content: "<:qf:1430530129825890375> You need **Manage Server** to modify points.", ephemeral: true });
-}
+const { requireAllowedGuild, hasManageServer, isPositiveInt } = require("../utils");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("addpoints")
-    .setDescription("Add reward points to a linked user (rank locked).")
+    .setDescription("Add reward points to a linked user (Manage Server required).")
     .addUserOption(opt =>
       opt.setName("user").setDescription("Discord user to give points to").setRequired(true)
     )
@@ -23,13 +21,10 @@ module.exports = {
       return interaction.reply({ content: "This bot can't be used in this server.", ephemeral: true });
     }
 
-const { hasManageServer } = require("../utils");
-
-if (!hasManageServer(interaction.member)) {
-  return interaction.reply({ content: "❌ You need **Manage Server** to modify points.", ephemeral: true });
-}
-
-
+    // ✅ permission check goes HERE (inside execute)
+    if (!hasManageServer(interaction.member)) {
+      return interaction.reply({ content: "❌ You need **Manage Server** to modify points.", ephemeral: true });
+    }
 
     const target = interaction.options.getUser("user");
     const amount = interaction.options.getInteger("amount");
@@ -48,7 +43,7 @@ if (!hasManageServer(interaction.member)) {
       );
 
       if (u.rowCount === 0 || !u.rows[0].roblox_user_id) {
-        return { ok: false, reason: "That user isn’t linked. They need /link then Verify first." };
+        return { ok: false, reason: "That user isn’t linked. They need /link then verify first." };
       }
 
       const userId = u.rows[0].id;

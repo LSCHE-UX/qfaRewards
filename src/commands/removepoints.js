@@ -1,13 +1,11 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { withTx } = require("../db");
-if (!hasManageServer(interaction.member)) {
-  return interaction.reply({ content: "<:qf:1430530129825890375> You need **Manage Server** to modify points.", ephemeral: true });
-}
+const { requireAllowedGuild, hasManageServer, isPositiveInt } = require("../utils");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("removepoints")
-    .setDescription("Remove reward points from a linked user (rank locked).")
+    .setDescription("Remove reward points from a linked user (Manage Server required).")
     .addUserOption(opt =>
       opt.setName("user").setDescription("Discord user to remove points from").setRequired(true)
     )
@@ -23,19 +21,19 @@ module.exports = {
       return interaction.reply({ content: "This bot can't be used in this server.", ephemeral: true });
     }
 
-    if (!hasAnyRole(interaction.member, pointsAdminRoleIds)) {
-      return interaction.reply({ content: "❌ You don’t have permission to modify points.", ephemeral: true });
+    // ✅ permission check goes HERE (inside execute)
+    if (!hasManageServer(interaction.member)) {
+      return interaction.reply({ content: "❌ You need **Manage Server** to modify points.", ephemeral: true });
     }
 
     const target = interaction.options.getUser("user");
     const amount = interaction.options.getInteger("amount");
     const reason = interaction.options.getString("reason") || "Admin adjustment";
+    const actorId = interaction.user.id;
 
     if (!isPositiveInt(amount)) {
       return interaction.reply({ content: "Amount must be a positive whole number.", ephemeral: true });
     }
-
-    const actorId = interaction.user.id;
 
     const outcome = await withTx(async (db) => {
       const u = await db.query(
@@ -44,7 +42,7 @@ module.exports = {
       );
 
       if (u.rowCount === 0 || !u.rows[0].roblox_user_id) {
-        return { ok: false, reason: "That user isn’t linked. They need /link then Verify first." };
+        return { ok: false, reason: "That user isn’t linked. They need /link then verify first." };
       }
 
       const userId = u.rows[0].id;
