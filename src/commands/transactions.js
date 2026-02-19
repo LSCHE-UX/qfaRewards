@@ -16,7 +16,7 @@ function toUnixSeconds(d) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("transactions")
-    .setDescription("View your recent points transactions.")
+    .setDescription("View your recent points transactions (added/removed + why).")
     .addIntegerOption(opt =>
       opt.setName("limit")
         .setDescription("How many to show (1–25). Default 15.")
@@ -65,12 +65,10 @@ module.exports = {
       : "_No transactions yet._";
 
     const embed = new EmbedBuilder()
-      .setTitle("<:qantas_tail:1430530129825890375> Qantas Frequent Flyers — Transactions")
+      .setTitle("🧾 Qantas Rewards — Transactions")
       .setDescription(`Roblox: **${u.roblox_username}** (${u.roblox_user_id})`)
       .addFields({ name: `Last ${Math.min(limit, txRes.rows.length)} transactions`, value: lines })
-      .setFooter({ text: "Positive = added • Negative = removed" })
-      .setImage('https://media.discordapp.net/attachments/1392247713474678815/1469567409680809994/image.png?ex=6997f2cd&is=6996a14d&hm=ee1a901937b0ae4fcad1b2a2c76e9995e904f9f885c4852d271ded92cc2ed4f6&=&format=webp&quality=lossless&width=1134&height=15')
-      .setcolor(0xdf0000);
+      .setFooter({ text: "Positive = added • Negative = removed" });
 
     return interaction.reply({ embeds: [embed], ephemeral: true });
   }
