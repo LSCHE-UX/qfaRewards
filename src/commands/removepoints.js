@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { withTx } = require("../db");
-const { requireAllowedGuild, hasAnyRole, pointsAdminRoleIds, isPositiveInt } = require("../utils");
+if (!hasManageServer(interaction.member)) {
+  return interaction.reply({ content: "<:qf:1430530129825890375> You need **Manage Server** to modify points.", ephemeral: true });
+}
 
 module.exports = {
   data: new SlashCommandBuilder()

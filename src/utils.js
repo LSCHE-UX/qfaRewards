@@ -1,12 +1,20 @@
-const { pointsAdminRoleIds, allowedGuildIds } = require("./config");
+const { PermissionsBitField } = require("discord.js");
+const { allowedGuildIds, pointsAdminRoleIds } = require("./config");
 
 function hasAnyRole(member, roleIds) {
   if (!member || !roleIds?.length) return false;
-  return roleIds.some(id => member.roles.cache.has(id));
+  return roleIds.some((id) => member.roles.cache.has(id));
 }
 
+// NEW: permission-based check (Manage Server)
+function hasManageServer(member) {
+  if (!member) return false;
+  return member.permissions.has(PermissionsBitField.Flags.ManageGuild);
+}
+
+// Keep this: used by every command
 function requireAllowedGuild(interaction) {
-  if (!allowedGuildIds.length) return true;
+  if (!allowedGuildIds?.length) return true;
   return interaction.guildId && allowedGuildIds.includes(interaction.guildId);
 }
 
@@ -27,21 +35,10 @@ function isPositiveInt(n) {
 
 module.exports = {
   hasAnyRole,
+  hasManageServer,
   requireAllowedGuild,
   makeLinkCode,
   nowPlusMinutes,
   isPositiveInt,
   pointsAdminRoleIds
-};
-
-const { PermissionsBitField } = require("discord.js");
-
-function hasManageServer(member) {
-  if (!member) return false;
-  return member.permissions.has(PermissionsBitField.Flags.ManageGuild);
-}
-
-module.exports = {
-  // ...keep your existing exports
-  hasManageServer,
 };
