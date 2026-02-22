@@ -155,6 +155,47 @@ client.once("ready", async () => {
   }
 });
 
+app.get("/api/roblox/profile", async (req, res) => {
+  try {
+    const secret = req.header("x-roblox-secret");
+    if (!secret || secret !== process.env.ROBLOX_SHARED_SECRET) {
+      return res.status(401).json({ ok: false, error: "Unauthorized" });
+    }
+
+    const usernameRaw = String(req.query.username || "").trim();
+    if (!usernameRaw) {
+      return res.status(400).json({ ok: false, error: "Missing username" });
+    }
+
+    // Case-insensitive match
+    const q = `
+      SELECT
+        u.id              AS user_id,
+        u.roblox_user_id  AS roblox_user_id,
+        u.roblox_username AS roblox_username,
+        u.discord_user_id AS discord_user_id,
+        w.id              AS wallet_id,
+        COALESCE(w.balance, 0) AS balance
+      FROM public.users u
+      LEFT JOIN public.wallets w ON w.user_id = u.id
+      WHERE LOWER(u.roblox_username) = LOWER($1)
+      ORDER BY u.id DESC
+      LIMIT 1;
+    `;
+
+    const result = await pool.query(q, [usernameRaw]);
+
+    if (result.rows.length === 0) {
+      return res.json({ ok: true, exists: false });
+    }
+
+    return res.json({ ok: true, exists: true, profile: result.rows[0] });
+  } catch (err) {
+    console.error("GET PROFILE BY USERNAME ERROR:", err);
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 /* =========================
    Interaction Handler
    ========================= */
