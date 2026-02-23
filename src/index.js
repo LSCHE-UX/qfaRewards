@@ -5,6 +5,7 @@ const path = require("path");
 const { token } = require("./config");
 const { query, withTx, initDatabase } = require("./db");
 const { getRobloxUserIdByUsername, getRobloxUserById } = require("./roblox");
+const { startFlightAwardDmWorker } = require("./workers/flightAwardDm");
 
 const {
   ModalBuilder,
@@ -143,6 +144,11 @@ function buildWelcomeRow(index, total) {
    ========================= */
 client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
+
+  startFlightAwardDmWorker(client, {
+    intervalMs: 30_000,
+    batchSize: 15,
+  });
 
   try {
     await query("SELECT 1");

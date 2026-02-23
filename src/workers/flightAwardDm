@@ -1,0 +1,133 @@
+const { EmbedBuilder } = require("discord.js");
+const { withTx } = require("../db");
+
+function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surveyUrl }) {
+  const flightNumber =
+    (metadata && (metadata.flightNumber || metadata.flight_number)) ||
+    reason ||
+    "your flight";
+
+  return new EmbedBuilder()
+    .setTitle("<:qantas_tail:1430530129825890375> Thank you for attending!")
+    .setDescription(
+      [
+        `Thanks for attending **${flightNumber}**.`,
+        ``,
+        `You earned: **+${amount} points**`,
+        ``,
+        `To check your balance, run **/points** in the Qantas server.`,
+        ``,
+          "We truly appreciate your support. If you can, please take a moment to rate your experience — your feedback helps us improve future flights.",
+        "",
+        `Flight review survey:`,
+        surveyUrl ? surveyUrl : "_(survey link not set)_"
+      ].join("\n")
+    )
+    .setFooter({ text: robloxUsername ? `Roblox: ${robloxUsername}` : "Qantas FrequentFlyer" });
+}
+
+/**
+ * Starts a polling worker that DMs users for FLIGHT_AWARD transactions.
+ * Safe: marks dm_sent_at so it only sends once.
+ */
+function startFlightAwardDmWorker(client, opts = {}) {
+  const intervalMs = opts.intervalMs ?? 30_000;
+  const batchSize = opts.batchSize ?? 15;
+  const maxAttempts = opts.maxAttempts ?? 5;
+
+  // put your survey link in Railway env as SURVEY_URL
+  const surveyUrl = process.env.SURVEY_URL || "";
+
+  async function tick() {
+    try {
+      // Fetch unsent flight awards for linked users
+      const rows = await withTx(async (db) => {
+        const res = await db.query(
+          `
+          SELECT
+            t.id AS tx_id,
+            t.user_id,
+            t.amount,
+            t.reason,
+            t.metadata,
+            u.discord_user_id,
+            u.roblox_username
+          FROM transactions t
+          JOIN users u ON u.id = t.user_id
+          WHERE t.type = 'FLIGHT_AWARD'
+            AND t.dm_sent_at IS NULL
+            AND u.discord_user_id IS NOT NULL
+            AND t.dm_attempts < $1
+          ORDER BY t.created_at ASC
+          LIMIT $2
+          `,
+          [maxAttempts, batchSize]
+        );
+
+        // “claim” them by bumping attempt count so two instances don’t double-send
+        // (This is basic protection; if you will run multiple replicas, we can hard-lock with SKIP LOCKED.)
+        for (const r of res.rows) {
+          await db.query(
+            `UPDATE transactions
+             SET dm_attempts = dm_attempts + 1,
+                 dm_last_attempt_at = NOW(),
+                 dm_error = NULL
+             WHERE id = $1`,
+            [r.tx_id]
+          );
+        }
+
+        return res.rows;
+      });
+
+      for (const r of rows) {
+        const metadata = r.metadata || null;
+
+        try {
+          const user = await client.users.fetch(String(r.discord_user_id));
+          if (!user) throw new Error("Discord user fetch returned null");
+
+          const embed = buildFlightAwardEmbed({
+            robloxUsername: r.roblox_username,
+            amount: r.amount,
+            reason: r.reason,
+            metadata,
+            surveyUrl
+          });
+
+          await user.send({ embeds: [embed] });
+
+          // Mark as sent
+          await withTx(async (db) => {
+            await db.query(
+              `UPDATE transactions
+               SET dm_sent_at = NOW(), dm_error = NULL
+               WHERE id = $1`,
+              [r.tx_id]
+            );
+          });
+        } catch (err) {
+          // Store error; leave dm_sent_at NULL so it can retry up to maxAttempts
+          await withTx(async (db) => {
+            await db.query(
+              `UPDATE transactions
+               SET dm_error = $2
+               WHERE id = $1`,
+              [r.tx_id, String(err?.message || err)]
+            );
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[FlightAwardDmWorker] tick error:", e);
+    }
+  }
+
+  // start
+  tick();
+  const handle = setInterval(tick, intervalMs);
+  console.log(`[FlightAwardDmWorker] Started (every ${intervalMs}ms).`);
+  return () => clearInterval(handle);
+}
+
+module.exports = { startFlightAwardDmWorker };
