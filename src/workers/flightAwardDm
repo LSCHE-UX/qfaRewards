@@ -11,7 +11,7 @@ function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surve
   return new EmbedBuilder()
     .setTitle("<:qantas_tail:1430530129825890375> Thank you for attending!")
     .setColor(0xE4002B)
-    .setThumbnail("https://cdn.discordapp.com/attachments/1392247775516954747/1471121087025774643/image.png?ex=699d99c7&is=699c4847&hm=8eaa520813e4b1e94af22f8f10340da188281428c384c11f32107d0b64f8b7fc&")
+    .setImage("https://cdn.discordapp.com/attachments/1392247775516954747/1471121087025774643/image.png?ex=699d99c7&is=699c4847&hm=8eaa520813e4b1e94af22f8f10340da188281428c384c11f32107d0b64f8b7fc&")
     .setDescription(
       [
         `Thanks for attending **${flightNumber}**.`,
@@ -20,10 +20,7 @@ function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surve
         ``,
         `To check your balance, run **/points** in the Qantas server.`,
         ``,
-          "We truly appreciate your support. If you can, please take a moment to rate your experience — your feedback helps us improve future flights.",
-        "",
-        `Flight review survey:`,
-        surveyUrl ? surveyUrl : "_(survey link not set)_"
+          "We truly appreciate your support. If you can, please take a moment to rate your experience — your feedback helps us improve future flights. Please click <:link1:1403914963877363867> [here](https://forms.gle/J7T3Xz4eWdD6SLkb7) to take a quick survey. It should only take a minute and it would mean a lot to us!",
       ].join("\n")
     )
     .setFooter({ text: robloxUsername ? `Roblox: ${robloxUsername}` : "Qantas FrequentFlyer" });
