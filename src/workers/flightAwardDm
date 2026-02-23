@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { withTx } = require("../db");
+console.log("[FlightAwardDmWorker] booting…");
 
 function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surveyUrl }) {
   const flightNumber =
@@ -78,6 +79,7 @@ function startFlightAwardDmWorker(client, opts = {}) {
         }
 
         return res.rows;
+        console.log("[FlightAwardDmWorker] tick");
       });
 
       for (const r of rows) {

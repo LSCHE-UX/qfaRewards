@@ -145,17 +145,18 @@ function buildWelcomeRow(index, total) {
 client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
 
-  startFlightAwardDmWorker(client, {
-    intervalMs: 30_000,
-    batchSize: 15,
-  });
-
   try {
     await query("SELECT 1");
     console.log("✅ Database connected");
 
     await initDatabase();
-    console.log("📦 Tables ensured");
+    console.log("🧱 Tables ensured");
+
+    startFlightAwardDmWorker(client, {
+      intervalMs: 30_000,
+      batchSize: 15,
+    });
+    console.log("✅ FlightAward DM worker started");
   } catch (e) {
     console.error("❌ Database setup failed:", e.message);
   }
