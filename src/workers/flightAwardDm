@@ -10,6 +10,8 @@ function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surve
 
   return new EmbedBuilder()
     .setTitle("<:qantas_tail:1430530129825890375> Thank you for attending!")
+    .setColor(0xE4002B)
+    .setThumbnail("https://cdn.discordapp.com/attachments/1392247775516954747/1471121087025774643/image.png?ex=699d99c7&is=699c4847&hm=8eaa520813e4b1e94af22f8f10340da188281428c384c11f32107d0b64f8b7fc&")
     .setDescription(
       [
         `Thanks for attending **${flightNumber}**.`,
@@ -27,10 +29,7 @@ function buildFlightAwardEmbed({ robloxUsername, amount, reason, metadata, surve
     .setFooter({ text: robloxUsername ? `Roblox: ${robloxUsername}` : "Qantas FrequentFlyer" });
 }
 
-/**
- * Starts a polling worker that DMs users for FLIGHT_AWARD transactions.
- * Safe: marks dm_sent_at so it only sends once.
- */
+
 function startFlightAwardDmWorker(client, opts = {}) {
   const intervalMs = opts.intervalMs ?? 30_000;
   const batchSize = opts.batchSize ?? 15;
